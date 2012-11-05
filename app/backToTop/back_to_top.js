@@ -16,6 +16,10 @@ IQ.define('app.BackToTop',['classFactory'],function(classFactory){
 			_describe : 'back-to-top APP'
 	};
 	var BackToTop = classFactory.create(classFactory.base,{
+		require : {
+			"www.aaaa.js",
+			"www.bbb.js"
+		},
 		//构造函数
 		_izer : function(config){
 			this.data = config;
