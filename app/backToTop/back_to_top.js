@@ -70,7 +70,7 @@ IQ.define('app.BackToTop',['classFactory'],function(classFactory){
 					_html.style.cssText="zoom:1;background-image:url(about:blank);background-attachment:fixed";
 				}
 				_height = $(window).innerHeight();
-				target[0].style.setExpression('right','eval(document.documentElement.scrollLeft+20)+"px"'); //这里为什么会少100px，没想明白
+				target[0].style.setExpression('right','eval(document.documentElement.scrollLeft+20)+"px"'); 
 				target[0].style.setExpression('top','eval(document.documentElement.scrollTop+'+_height+'-100)+"px"');
 			},
 			goToTop : function(target){
