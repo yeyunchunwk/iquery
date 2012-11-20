@@ -66,105 +66,7 @@
 		// 延迟使用模块队列。
 		pending = {};
 
-	/**
-	 * 文档就绪时执行回调函数。
-	 * 基于Ryan Morr的成果(https://github.com/ryanmorr/ondomready)。
-	 * @static
-	 * @private
-	 * @method onDOMReady
-	 * @param fn {Function} 回调函数。
-	 */
-	function onDOMReady(fn) {
-		var timer, win = GLOBAL, doc = win.document, onreadystatechange = doc.onreadystatechange;
-
-		function onStateChange(e) {
-			// IE兼容处理。
-			e = e || win.event;
-			// Mozilla、Opera和古董。
-			if (e && e.type && (/DOMContentLoaded|load/).test(e.type)) {
-				fireDOMReady();
-			// 古董。
-			} else if (doc.readyState) {
-				if ((/loaded|complete/).test(doc.readyState)) {
-					fireDOMReady();
-				// IE，避免在iframe中使用此技巧，基于Diego Perini的成果(http://javascript.nwbox.com/IEContentLoaded/)。
-				} else if (self === self.top && doc.documentElement.doScroll) {
-					try {
-						// 在文档就绪前调用doScroll会产生异常。
-						if (!domReady) {
-							doc.documentElement.doScroll('left');
-						}
-					} catch (e) {
-						return;
-					}
-					// 无异常产生时文档必然就绪。
-					fireDOMReady();
-				}
-			}
-		}
-
-		// 执行回调函数并清理内存。
-		function fireDOMReady() {
-			if (!domReady) {
-				domReady = true;
-				// 执行回调函数。
-				fn.apply({});
-				// 清理内存。
-				if (doc.removeEventListener) {
-					doc.removeEventListener('DOMContentLoaded', onStateChange, false);
-				}
-				// 清理定时器。
-				clearInterval(timer);
-			}
-		}
-
-		// Mozilla和Opera。
-		if (doc.addEventListener) {
-			doc.addEventListener("DOMContentLoaded", onStateChange, false);
-		}
-		// Safari和IE。
-		timer = setInterval(onStateChange, 40);
-		// IE等古董。
-		onPageLoad(onStateChange);
-		doc.onreadystatechange = function () {
-			onStateChange.apply(doc, arguments);
-			// 避免覆盖已有回调函数。
-			if (typeof onreadystatechange === 'function') {
-				onreadystatechange.apply(doc, arguments);
-			}
-		};
-	}
-
-	/**
-	 * 页面加载完成时执行回调函数。
-	 * @static
-	 * @private
-	 * @method onPageLoad
-	 * @param fn {Function} 回调函数。
-	 */
-	function onPageLoad(fn) {
-		var prev;
-
-		if (GLOBAL.addEventListener) {
-			// 现代浏览器。
-			GLOBAL.addEventListener('load', fn, false);
-		} else if (GLOBAL.attachEvent) {
-			// 古董IE。
-			GLOBAL.attachEvent('onload', fn);
-		} else if (typeof GLOBAL.onload === 'function') {
-			// 文物。
-			// 避免覆盖已有回调函数。
-			prev = GLOBAL.onload;
-			GLOBAL.onload = function () {
-				fn.apply(GLOBAL, arguments);
-				prev.apply(GLOBAL, arguments);
-			};
-		} else {
-			// 文物。
-			GLOBAL.onload = fn;
-		}
-	}
-
+	
 	/**
 	 * 使用延迟队列中的模块。
 	 * @static
@@ -225,35 +127,6 @@
 
 	var IQ = GLOBAL[GLOBAL_VAR_NAME] = GLOBAL[GLOBAL_VAR_NAME] || {};
 
-	/**
-	 * 把某个函数的执行时刻延迟到文档就绪之后。
-	 * <pre>
-	 * IQ.defer(function (id) {
-	 *     this.getElementById(id);
-	 * }, document, [ 'foo' ]);
-	 * </pre>
-	 * 文档就绪之后该函数的功能变为立即异步执行某个函数。
-	 * @static
-	 * @public
-	 * @method defer
-	 * @param fn {Function} 延迟函数。
-	 * @param [context] {Object} 延迟函数作用域。
-	 * @param [arg] {Array} 延迟函数参数。
-	 */
-	IQ.defer = IQ.defer || function (fn, context, args) {
-		var wrapper = function () {
-				IQ.use([ '$domReady' ], function () {
-					fn.apply(context || GLOBAL, args || []);
-				});
-			};
-
-		if (domReady) {
-			// 文档就绪之后异步执行回调函数。
-			setTimeout(wrapper, 0);
-		} else {
-			wrapper();
-		}
-	};
 
 	/**
 	 * 定义一个新模块。
@@ -491,6 +364,12 @@
 				if (!pending[name]) {
 					pending[name] = [];
 				}
+				//如果未定义 使用loadJS异步加载该js文件
+				if(name != "$domReady"){
+					IQ.loadJS(name,null,function(){
+						console.log(name+" loaded");
+					});
+				}
 				// 未定义模块的导出对象为null。
 				required[i] = null;
 			}
@@ -499,6 +378,27 @@
 		return required;
 	};
 
+	IQ.loadJS = IQ.loadJS || function(name,url,callback){
+		var nameArr = name.split(".");
+		var newName = nameArr.join("/");
+		var path = location.host;
+		var protocol = location.protocol;
+		url = url  || protocol + "//" + path +"/"+ newName + ".js" + "?timestamp="+(new Date-0);//(new Date -0)则自动转化为数字
+	    var head = document.getElementsByTagName('head')[0];
+	    var script= document.createElement('script');
+		script.type= 'text/javascript';
+		script.onload = script.onreadystatechange = function() { 
+		    if (!this.readyState || this.readyState === "loaded" ||    this.readyState === "complete" ) {
+		        if(callback){
+		        	callback();
+		        }
+		        // Handle memory leak in IE
+		            script.onload = script.onreadystatechange = null;
+		    } };
+		script.src= url;
+		head.appendChild(script);
+	}
+	
 	IQ.define('iquery', function () {
 		/**
 		 * 模块对象。
@@ -657,15 +557,6 @@
 		};
 	});
 
-	// 定义$domReady模块。
-	onDOMReady(function () {
-		IQ.define('$domReady', function () {});
-	});
-
-	// 定义$pageLoad模块。
-	onPageLoad(function () {
-		IQ.define('$pageLoad', function () {});
-	});
 
 	// 检查URL中的debug参数。
 	(function () {

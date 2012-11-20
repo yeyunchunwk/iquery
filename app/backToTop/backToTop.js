@@ -4,7 +4,7 @@
  * @time: 2012-10-25
  * @update 
  */
-IQ.define('app.BackToTop',['classFactory'],function(classFactory){
+IQ.define('app.backToTop.backToTop',['classFactory'],function(classFactory){
 	//默认配置，是可配的，外面可以改的
 	var _config = {
 		//传入的目标id，如果不存在，则默认为NULL,则BackToTop组件会自动创建一个
@@ -16,10 +16,6 @@ IQ.define('app.BackToTop',['classFactory'],function(classFactory){
 			_describe : 'back-to-top APP'
 	};
 	var BackToTop = classFactory.create(classFactory.base,{
-		require : {
-			"www.aaaa.js",
-			"www.bbb.js"
-		},
 		//构造函数
 		_izer : function(config){
 			this.data = config;
