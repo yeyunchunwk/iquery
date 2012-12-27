@@ -35,6 +35,15 @@
  * @class window.IQ
  * @static
  */
+
+/**
+ * 该config主要用来定义一些全局的参数，如静态服务器的url等
+ */
+window.baseConfig = window.baseConfig ||{
+	//定义全局的静态url，自动加载需要
+	STATIC_URL : ''
+};
+
 (function (GLOBAL, GLOBAL_VAR_NAME, UNDEFINED) {
 		// 模块名->模块元数据映射表。
 	var modules = {},
@@ -126,8 +135,6 @@
 	}
 
 	var IQ = GLOBAL[GLOBAL_VAR_NAME] = GLOBAL[GLOBAL_VAR_NAME] || {};
-
-
 	/**
 	 * 定义一个新模块。
 	 * <pre>
@@ -367,7 +374,7 @@
 				//如果未定义 使用loadJS异步加载该js文件
 				if(name != "$domReady"){
 					IQ.loadJS(name,null,function(){
-						console.log(name+" loaded");
+						//console.log(name+" loaded");
 					});
 				}
 				// 未定义模块的导出对象为null。
@@ -379,11 +386,18 @@
 	};
 
 	IQ.loadJS = IQ.loadJS || function(name,url,callback){
+		var newURL;
 		var nameArr = name.split(".");
 		var newName = nameArr.join("/");
-		var path = location.host;
-		var protocol = location.protocol;
-		url = url  || protocol + "//" + path +"/"+ newName + ".js" + "?timestamp="+(new Date-0);//(new Date -0)则自动转化为数字
+		if(/^(http|https)/i.test(name)){
+			newURL = name+"?timestamp="+(new Date-0);
+		}else if(!!window.baseConfig.STATIC_URL){	
+			newURL = url||window.baseConfig.STATIC_URL + newName + ".js" + "?timestamp="+(new Date-0);;
+		}else{
+			var path = location.host;
+			var protocol = location.protocol;
+			newURL = url  || protocol + "//" + path +"/"+ newName + ".js" + "?timestamp="+(new Date-0);//(new Date -0)则自动转化为数字
+		}
 	    var head = document.getElementsByTagName('head')[0];
 	    var script= document.createElement('script');
 		script.type= 'text/javascript';
@@ -395,7 +409,7 @@
 		        // Handle memory leak in IE
 		            script.onload = script.onreadystatechange = null;
 		    } };
-		script.src= url;
+		script.src= newURL;
 		head.appendChild(script);
 	}
 	

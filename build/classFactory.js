@@ -42,19 +42,19 @@ IQ.define('classFactory',[],function(){
 		 */
 		create : function(target,classObj,_CONFIG,_DATA){
 			//合并父对象和子类对象
-			var superObj = $.extend(target,classObj);
-			
+			var _parent = this;
+			var superObj = this._merge(target,classObj);
 			var fun = function(config){
 				config = config || {};
 				var _config = {};
 				var _self = this;
 				//合并默认配置和类初始化配置
 				if(!!_CONFIG){
-					_config = $.extend(_CONFIG,config);
+					_config = _parent._merge(_CONFIG,config);
 				}
 				//如果有静态属性，进一步合并
 				if(!!_DATA){
-					_config = $.extend(_config,_DATA);
+					_config = _parent._merge(_config,_DATA);
 				}
 				//如果存在构造函数，则执行这个函数
 				if(!!superObj.hasOwnProperty('_izer')){
@@ -65,6 +65,12 @@ IQ.define('classFactory',[],function(){
 			fun.prototype.constructor = fun;
 			//返回生成的构造函数
 			return fun;
+		},
+		_merge : function(target,config){
+			for(var name in config){
+					target[name] = config[name];
+			}
+			return target;
 		}
 	}
 	return ClassFactory;

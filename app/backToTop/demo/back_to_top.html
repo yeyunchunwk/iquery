@@ -3,9 +3,15 @@
 <head>
 	<meta charset="UTF-8">
 	<title></title>
+	<script type="text/javascript">
+		window.baseConfig = {
+			//STATIC_URL : 'http://www.baidu.com'
+		}
+	</script>
 	<script type="text/javascript" src="../../../build/jquery.js"></script>
 	<script type="text/javascript" src="../../../build/iquery.js"></script>
 	<script type="text/javascript" src="../../../build/classFactory.js"></script>
+	
 	<style type="text/css">
 	    /**自定义的时候记得要写样式**/
 		/*.back-to-top{
@@ -89,7 +95,16 @@
 				//默认的组件样式 直接new一个对象就可以了
 				var backToTop = new BackToTop();
 			});
+			//直接use则会自动加载js
+			IQ.use('http://img.alibaba.com/js/beacon_en.js',function(a){
+				console.log(a);
+			})
+			
+			IQ.use('http://img.alibaba.com/js/beacon_en.js',function(a){
+				console.log(a);
+			})
 		});
+		
 	</script>
 </body>
 </html>
